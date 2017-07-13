@@ -8,6 +8,7 @@ defmodule Til.Mixfile do
      escript: [ main_module: TIL],
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_paths: elixirc_paths(Mix.env),
      deps: deps()]
   end
 
@@ -31,4 +32,8 @@ defmodule Til.Mixfile do
   defp deps do
     [{:httpoison, "~> 0.11.1"}, {:poison, "~> 3.1"}]
   end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
 end
