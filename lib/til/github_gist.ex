@@ -1,32 +1,17 @@
 defmodule TIL.GithubGist do
-  alias TIL.{Github, BasicAuth, ConfigFile}
+  @github_client Application.get_env(:til, :github_client)
 
   def create(til, opts\\[]) do
-    HTTPoison.start
-    HTTPoison.post!(gist_url(), gist_body(til, opts), [{"Accept", "application/json"}], BasicAuth.auth(username(), token()))
+    @github_client.create_gist(gist_body(til, opts))
     |> parse_response
   end
 
-  defp username, do: config_file_content()["username"]
-
-  defp token, do: config_file_content()["token"]
-
-  defp config_file_content, do: ConfigFile.config_file_content
-
-  defp gist_body(content, opts) do
+  def gist_body(content, opts) do
     Poison.encode!(%{
       "description": opts[:description] || "",
-      "public": opts[:public] || true,
-      "files": %{
-        "file1.txt": %{
-          "content": content
-        }
-      }
+      "public": Keyword.get(opts, :public, true),
+      "files": %{} |> Map.put(opts[:file_name] || "file1.txt", %{ "content": content  })
     })
-  end
-
-  defp gist_url do
-    Github.url <> "/gists"
   end
 
   defp parse_response(%HTTPoison.Response{status_code: status_code, body: body}) do

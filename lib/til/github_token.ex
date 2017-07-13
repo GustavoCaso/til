@@ -1,22 +1,9 @@
 defmodule TIL.GithubToken do
-  alias TIL.{Github, BasicAuth}
+  @github_client Application.get_env(:til, :github_client)
 
   def new_credential(username, password) do
-    HTTPoison.start
-    HTTPoison.post!(credentials_url(), credentials_body(), [{"Accept", "application/json"}], BasicAuth.auth(username, password))
+    @github_client.create_token(username, password)
     |> match_response
-  end
-
-  defp credentials_url do
-    Github.url <> "/credentials"
-  end
-
-  defp credentials_body do
-    Poison.encode!(%{
-      "scopes": ["gist"],
-      "note": "The til command line",
-      "note_url":  "https://github.com/GustavoCaso/til"
-    })
   end
 
   defp match_response(response) do

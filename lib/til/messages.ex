@@ -1,6 +1,17 @@
 defmodule TIL.Messages do
   def help_message do
     IO.puts """
+    TIL (Today I Learn)
+
+    Usage:
+      til [options] <What I learn today>
+
+      -h , --help                                           Show this this help message.
+      --login                                               Star workflow for login in Github.
+      --auth-token TOKEN                                    Create a congiguration file storing your token.
+      -f, --file-name FILENAME <What I learn today>         Create a new gist with spcific file name.
+      -d, --description DESCRICTION <What I learn today>    Create a new gist with custom description.
+      -p, --public, --no-public <What I Learn today>        Create a public or private gist. Default public.
     """
   end
 

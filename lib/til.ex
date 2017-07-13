@@ -1,5 +1,5 @@
 defmodule TIL do
-  alias TIL.{Authentication, ConfigFile, Messages, GithubGist}
+  alias TIL.{GithubToken, ConfigFile, Messages, GithubGist}
 
   def main(args) do
     args |> parse_args |> process
@@ -11,9 +11,7 @@ defmodule TIL do
       { [help: true], _, _ } -> [:help]
       { [login: true], _, _ } -> [:login]
       { [auth_token: token], _, _ } -> [:auth_token, token]
-      { [description: description], [til], _} -> [:create, til, [description: description]]
-      { [public: public], [til], _} -> [:create, til, [public: public]]
-      { [description: description, public: public], [til], _} -> [:create, til, [description: description, public: public]]
+      { options, [til], _} -> [:create, til, options]
       { [], [til], [] } -> [:create, til, []]
     end
   end
@@ -26,7 +24,13 @@ defmodule TIL do
     IO.puts "Obtaining OAuth2 access_token from github."
     username = gets "Github Username: "
     password = gets "password: "
-    Authentication.create_auth_token(username, password)
+    case GithubToken.new_credential(username, password) do
+      {:ok, token } ->
+        ConfigFile.create(username, token)
+        Messages.succesful_auth_message
+      {:error, :two_factor} -> Messages.two_factor_message
+      {:error, :invalid_credentials} -> Messages.invalid_credentials
+    end
   end
 
   def process([:auth_token, token]) do
@@ -52,6 +56,7 @@ defmodule TIL do
       login: :boolean,
       description: :string,
       public: :boolean,
+      file_name: :string,
       auth_token: :string
     ]
   end
@@ -60,6 +65,7 @@ defmodule TIL do
     [
       h: :help,
       d: :description,
+      f: :file_name,
       p: :public
     ]
   end
